@@ -13,7 +13,33 @@ kapandı bu kısımda cm devreye girer ve podu ayaga kaldırır.
 ## Pod
 - Kubernetes container orkestra şefi. K8s de containerlar podlar üzerinde oluşturulur.Podlar içerisinde 1 veya birden fazla container olablir.(Best practice 1P = 1C)  
 - pod calışma süreci = Her pod’un unique bir ID’si (uid) vardır ve unique bir IP’si vardır. Api-server, bu uid ve IP’yi etcd’ye kaydeder. Scheduler ise herhangi bir podun node ile ilişkisi kurulmadığını görürse, o podu çalıştırması için uygun bir worker node seçer ve bu bilgiyi pod tanımına ekler. Pod içerisinde çalışan kubelet servisi bu pod tanımını görür ve ilgili container’ı çalıştırır.  
-- Aynı pod içerisindeki containerlar aynı node üzerinde çalıştırılır ve bu containerlar arasında network izolasyonu yoktur. Yani localhost üzerinden biribirleriyle  
-hbaerleşir.
-``` kubectl run --image=nginx --port 8080:80 --labels="app=fe" ```
+- Aynı pod içerisindeki containerlar aynı node üzerinde çalıştırılır ve bu containerlar arasında network izolasyonu yoktur. Yani localhost üzerinden biribirleriyle hbaerleşir.  
+
+#### Komutlar
+``` kubectl run <podname> --image=nginx --port=80 --labels="app=fe" ```  
+```kubectl get pods -o wide```
+```kubectl delete pod <podname>```  
+```kubectl describe pod <podname>```  
+```kubectl logs (-f canlı bağlanır)<podname>```  
+```kubectl exec -it first-pod -- /bin/sh```  
+```kubectl exec -it first-pod -c <containername> -- /bin/sh``` 
+- .yaml uzantılı dosya ile pod oluşturulubalir. "---" birden fazla pod tanımlanabilir.  
+- kind –> Hangi object türünü oluşturmak istiyorsak buraya yazarız. ÖR: pod  
+- apiversion -> Oluşturmak istediğimiz object’in hangi API üzerinde ya da endpoint üzerinde sunulduğunu gösterir.  
+- metadata -> Object ile ilgili unique bilgileri tanımladığımız yerdir. ÖR: namespace, annotation vb.  
+- spec -> Oluşturmak istediğimiz object’in özelliklerini belirttiğimiz yerdir. Her object için gireceğimiz bilgiler farklıdır. Burada yazacağımız tanımları, dokümantasyondan bakabiliriz.  
+- oluşturulan yaml dosyasını çaliştırma : ```kubectl apply -f <...yml>```  
+- oluşturulan yaml dosyasını silme : ```kubectl delete -f <...yml>```  
+- oluşturulan yaml dosyasını editleme : ```kubectl edit -f <...yml>```  
+### pod yaşam döngüsü
+- Bir pod oluşturulacakken önce etdye kaydedilir(Pending).Daha sonra podun üzerinde koşacağı node kube-schduler tarafından ayarlanır ve etcd ye kaydedilir.Daha sonra
+etcd kayıtlı olan bilgileri izleyen kubelet containerd ile imajları oluşsturuur.  
+Pod klasörünü incele...
+
+
+
+
+
+
+
 
