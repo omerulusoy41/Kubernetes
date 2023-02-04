@@ -34,6 +34,9 @@ kapandı bu kısımda cm devreye girer ve podu ayaga kaldırır.
 ### pod yaşam döngüsü
 - Bir pod oluşturulacakken önce etdye kaydedilir(Pending).Daha sonra podun üzerinde koşacağı node kube-schduler tarafından ayarlanır ve etcd ye kaydedilir.Daha sonra
 etcd kayıtlı olan bilgileri izleyen kubelet containerd ile imajları oluşsturuur.  
+- Pod üzeriden tanımlanan label lar gruplandırma özelliği sayesinde filtreleme işlemlerinde ve pod selector ile pod seçme kısmında kullanılır.  
+```kubectl get pods -l "app=first"```  
+```kubectl get pods -l "!app"```  
 Pod klasörünü incele...
 
 
