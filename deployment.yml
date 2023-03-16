@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: cvdeployment
+    labels:
+      team: devops
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cv
+  template:
+    metadata:
+      labels:
+        app: cv
+    spec:
+      containers:
+      - name: cv
+        image: gcr.io/lively-lock-380013/omerulusoy/javascriptkodlari:cv
+        ports:
+        - containerPort: 80
+    
+
