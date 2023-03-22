@@ -207,6 +207,14 @@ resources:
         cpu: "0.5" # = "Yarım CPU Core" = "500m"
         
 ```
+## Environment Vaiables
+```
+ env:
+      - name: USER   # önce name'ini giriyoruz.
+        value: "Ozgur"  # sonra value'sunu giriyoruz.
+      - name: database
+        value: "testdb.example.com"
+ ```
 ## k8s Ağ altyapısı
 K8s kurulumda pod’lara ip dağıtılması için bir IP adres aralığı (--pod-network-cidr) belirlenir.Tüm podlara uniq bir ip atanır.
 Aynı cluster üzerindeki poldar birbirleri üzerinde bir Nat olmadan haberleşebilir.3 tür servis objesi vardır:
