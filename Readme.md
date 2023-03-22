@@ -149,10 +149,68 @@ yapılan güncelklemelerin listelenmesi için:
 ```kubectl rollout history deployment rolldeployment ```  
 yapılan güncellemelerde farklı revisona geçmk için:  
 ```kubectl rollout undo deployment rolldeployment --to-revision=1```  
-##k8s Ağ altyapısı
+## Healthcheck
+- liveneesprobe :  pod un çalışma zamanında sağlık durumunu kontrol etmek için kkullanılan object tyepe dir.
+```
+livenessProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+```
+```
+livenessProbe:
+       httpGet:
+        path: /healthz
+        port: 8080
+        httpHeaders:
+        - name: Custom-Header
+          value: Awesome
+      initialDelaySeconds: 3
+      periodSeconds: 3
+```
+```
+tcpSocket:
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20
+```
+- readinees Probe = Bazen uygulamalar geçici olarak trafiğe hizmet veremez. Örneğin, bir uygulamanın başlatma sırasında büyük veri veya yapılandırma dosyaları yüklemesi veya başlatma sonrasında harici hizmetlere bağlı olması gerekebilir. Bu gibi durumlarda, uygulamayı öldürmek istemezsiniz, ancak ona istek göndermek de istemezsiniz.
+```
+readinessProbe:
+  exec:
+    command:
+    - cat
+    - /tmp/healthy
+  initialDelaySeconds: 5
+  periodSeconds: 5
+```
+```
+readinessProbe:
+          httpGet:
+            path: /ready	# Bu endpoint'e istek atılır, OK dönerse uygulama çalıştırılır.
+            port: 80
+          initialDelaySeconds: 20 # Başlangıçtan 20 sn gecikmeden sonra ilk kontrol yapılır.
+          periodSeconds: 3 # 3sn'de bir denemeye devam eder.
+```
+## Resource Management
+- belirtilen request ile podun çalışması için gereken donanımı limit ile de podun çalısırken ki sınırlanırılamaıs ayarlanır.
+```
+resources:
+      requests: # Podun çalışması için en az gereken gereksinim
+        memory: "64M"	# Bu podu en az 64M 250m (yani çeyrek core)
+        cpu: "250m" # = Çeyrek CPU core = "0.25"
+      limits: # Podun çalışması için en fazla gereken limit
+        memory: "256M"
+        cpu: "0.5" # = "Yarım CPU Core" = "500m"
+        
+```
+## k8s Ağ altyapısı
 K8s kurulumda pod’lara ip dağıtılması için bir IP adres aralığı (--pod-network-cidr) belirlenir.Tüm podlara uniq bir ip atanır.
 Aynı cluster üzerindeki poldar birbirleri üzerinde bir Nat olmadan haberleşebilir.3 tür servis objesi vardır:
-###Services 
+### Services 
 - ClusterIP: Cluster içöerisindeki podlar için bir endpoint oluşturur. Tüm podlar birbirlerinin adlarını tek tek bulmak yerine bu servis objesinin sağladığı endpointlerdenb haberleşebilir.  
 ```
 apiVersion: v1
@@ -198,7 +256,7 @@ spec:
   impretaive şekilde servis expose etme:
   ```kubectl expose deployment backend --type=ClusterIP --name=backend```
   -DNS = IPAdress.namespace.objecttype.cluster.local
-  ###NetworkPolicy
+###  NetworkPolicy
   Bu obje türü slector ile podları seçerek onların ağ trafikteki rollerini belirtir. Örneğin dışarıdan gelen(ingres) hangi poda yönlendirileceği, dışarıya giden(egres) trafiğin hangi podlar üzerinde olacagını beliritr.  
 ```
 apiVersion: networking.k8s.io/v1
@@ -269,9 +327,8 @@ spec:
 
           port: 5978
 ```  
+### Ingrees
 
-
-  
 
 
 
