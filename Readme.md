@@ -80,45 +80,25 @@ kubernetes de genellikle singleton podlar yaratılmaz.Podları bir üst seviye o
 deployments objesinde spec altında bir template içerisinde container oluşturabilirz.Örnek bir deployment yaml:
 ``` 
 apiVersion: apps/v1
-
 kind: Deployment
-
 metadata:
-
   name: nginx-deployment
-
   labels:
-
     app: nginx
-
 spec:
-
   replicas: 3
-
   selector:
-
     matchLabels:
-
       app: nginx
-
   template:
-
     metadata:
-
       labels:
-
         app: nginx
-
     spec:
-
       containers:
-
       - name: nginx
-
         image: nginx:1.14.2
-
         ports:
-
         - containerPort: 80
 ```
 replica sayısı podun kaç replicasi oldugunu belirtir.Selector altında match labels ile podun labelı ile eşleme yapıyoruz.  
@@ -341,7 +321,97 @@ spec:
 
 
 ## Authentication
-
+- Dışarıdan bi kullanıcı cluster a bağlanmak için certfica(x-509) ile contexte bilgileri geçilerek authenticate olması gerekiyor.Önce istekte bulunacak kişi ssl key oluşturmalı ve onu crypte etmeli.Daha sonra bunu kuberntese yollamalı.Kuberntese geelen bilgieler dogrultusunda k8s admini kullanıcı için bir certifica oluşturur ve onu decode ederek kullanıcıya geri verir. Authenticate olan kullanıcın yetkileri 0 olarak gerlir.61.ders  
+- RBAC = Role bir namespace içerisindeki objeler için(namespace belirtilmeli) , ClusterRole namespaceden bağımsız tüm cluster duzeyındeki objeler için rol atamaları yapar.
+- Role:  
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-and-pod-logs-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list"]
+```
+- ClusterRole :  
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aggregate-cron-tabs-view
+  labels:
+    # Add these permissions to the "view" default role.
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules:
+- apiGroups: ["stable.example.com"]
+  resources: ["crontabs"]
+  verbs: ["get", "list", "watch"]
+```  
+- Role ve Cluster Rollerini kullanıcılara veya grouplara baglamak gerekir. Bunları yapacak objeler Rolebinding ve ClusterRoleBinding dir.  
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+- kind: User
+  name: jane # "name" is case sensitive
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role 
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```  
+### ServiceAccount
+- Service account uygulamna bazında(pod yetkiside denebilir) api servere erişim için kullanılan bir hesap türüdür.Service accounta role ve roleBindingler ile role ataması yapılır. Container içerisinde oto oluşan certifica ve token sayesinde api-server e erişim sağlayabiliriz. Pipeline lar ile istenilern verileri elde edebiliriz.
+```
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: testsa
+  namespace: default
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: podread
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: testsarolebinding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: testsa
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: podread
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testpod
+  namespace: default
+spec:
+  serviceAccountName: testsa
+  containers:
+  - name: testcontainer
+    image: ozgurozturknet/k8s:latest
+    ports:
+    - containerPort: 80
+ ```
+ - Üstteki yamlde bir servisacoount ve rol oluşturulur. Rolebinding ile sa ya role ataması yapılıur.Pod içerisinde containerin servisaccount belirlenir.Bu sürecte pod oluşusrken /var/run/secrets/kubernetes.io/serviceaccount klasörü içeriisinde token certifica verileri oluşur. Bunları kullnarak api-server ile role seviyesinde etkileşim kurulabilir.
 ## DeamonSet
 - Tüm workernode üzerinde bir pod çalışıtrmak istiyorsak bu podu deamonset ile sarmamız gerekir.Yeni bir node oluştugunda dahi deamonset bu podu orada tekrear ayaga kaldırır.Yaml formatı deployment ile tamamen aynıdır.
 ## k8s Ağ altyapısı
