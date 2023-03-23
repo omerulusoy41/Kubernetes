@@ -501,6 +501,35 @@ spec:
           port: 5978
 ```  
 ### Ingrees
+- Uygulamaları dış dunyaya açarken 1. sorun her uygulama içinb farklı farklı IP almak maaliyet,ikinci sorun mikroservice bir mimariye göre çalışan uygulamamda http://localhost/a a gelen ve http://localhost/b ye gelen istekler doğrultusunda trafiği container içerisinde farklı pathlere dağıtmak mümükün değil. Bu iki sorunudaortadan kaldıran ingreestir. 
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wildcard-host
+spec:
+  rules:
+  - host: "foo.bar.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/bar"
+        backend:
+          service:
+            name: service1
+            port:
+              number: 80
+  - host: "*.foo.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/foo"
+        backend:
+          service:
+            name: service2
+            port:
+              number: 80
+```
 
 
 
