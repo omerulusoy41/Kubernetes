@@ -317,8 +317,7 @@ spec:
         claimName: myclaim
 ```
 ### Storage Class
-
-
+- Persistent cloume ile depolama sağlayıcıları kurma zahmatinden kurtulmak için tanımlanmış obje diyebiliriz.Clous servis saglayılarında var olan bu volumeler claim ile birlikte podlara mount edilebilir.
 
 ## Authentication
 - Dışarıdan bi kullanıcı cluster a bağlanmak için certfica(x-509) ile contexte bilgileri geçilerek authenticate olması gerekiyor.Önce istekte bulunacak kişi ssl key oluşturmalı ve onu crypte etmeli.Daha sonra bunu kuberntese yollamalı.Kuberntese geelen bilgieler dogrultusunda k8s admini kullanıcı için bir certifica oluşturur ve onu decode ederek kullanıcıya geri verir. Authenticate olan kullanıcın yetkileri 0 olarak gerlir.61.ders  
