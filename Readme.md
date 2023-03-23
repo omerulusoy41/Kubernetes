@@ -215,6 +215,76 @@ resources:
       - name: database
         value: "testdb.example.com"
  ```
+ ## Volume
+ - Containerın çalışma mantıgı içerisine girip bir şeyleri değiştrime gerekiyorsa sil baştan yarat. Bu şu şekilde daha iyi açıklanabilir: Container imajı oluşturulurken bir Readable only layer katmanı ve onun üzerinde de yazılabilir bir katman bırakır. Readevle only katmanı imaj kapsamındayken yazılabilir katman container kapsamındadır yani ben imajdan bir container oluşturdğumda her seferinde aynı R/O layer oluşusacak üzerinde yazılabilir bir katman eklşenecek.Ben container içerisine girip yazılabilir katmanda istediğim gibi dosya yüklerim veri yazarım fakat bu container öldüğünde artık o verilere ulaşamam.K8sde ki podlar da bir container olduguna göre aynı mnatık buradada gecerlidir. Bu durumu önlemenin 2 yolu var: 
+ ### Geçici Volume
+ - empty dir volumeler podlara özeldir. Podlar var oldugu sürece varlıklarını sürdürürler. Container ölse bile bu voluemler silinmez.Kulannım senaryosu olarak multicontainer olarak çalışan podlar örnek verilebeilir. Belirtilen pathlerdeki değişiklikler diğer container ppathinde de değişikliği neden olur.  
+ ```
+  volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+  volumes:
+  - name: cache-volume
+    emptyDir:
+      {}
+ ```
+ - hostPath volumeler podun üzerinde çalıştığı worker node un belirlenen pathlerini containerlara mount etmeye yarar. Worker node üzerinde değişiklikler kalıcıdır.Pod ölse bile..   
+ 
+ ### Secret
+ - Secret object uygulşamamızın için değerli ve gizli olan verileri güvenli(base64) bir şekilde tutacagımıuz object türüdür. Oluşturulan secret objesi de aynı volume gibi podlara baglanabilir,env variable olarak verilebilir.Secret obje örneği:  
+ ```
+ apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+stringData:		# Hassas data'ları stringData altına yazıyoruz.
+  db_server: db.example.com
+  db_username: admin
+  db_password: P@ssw0rd!
+```  
+poda bağlama:  
+```
+   volumeMounts: # 2) Oluşturulan secret'lı volume'ü pod'a dahil ediyoruz.
+    - name: secret-vol
+      mountPath: /secret # 3) Uygulama içerisinde /secret klasörü volume'e dahil olmuştur. 
+      # Artık uygulama içerisinden bu dosyaya ulaşıp, değerleri okuyabiliriz.
+  volumes:				# 1) Önce volume'ü oluşturuyoruz ve secret'ı volume'e dahil ediyoruz.
+  - name: secret-vol
+    secret:
+      secretName: mysecret3 
+```
+```
+ env:	# Tüm secretları pod içerisinde env. variable olarak tanımlayabiliriz.
+    # Bu yöntemde, tüm secretları ve değerlerini tek tek tanımladık.
+      - name: username
+        valueFrom:
+          secretKeyRef:
+            name: mysecret3 # mysecret3 isimli secret'ın "db_username" key'li değerini al.
+            key: db_username
+      - name: password
+        valueFrom:
+          secretKeyRef:
+            name: mysecret3
+            key: db_password
+      - name: server
+        valueFrom:
+          secretKeyRef:
+            name: mysecret3
+            key: db_server
+```
+```
+  envFrom: # 2. yöntemle aynı, sadece tek fark tüm secretları tek bir seferde tanımlıyoruz.
+    - secretRef:
+        name: mysecret3
+```
+### Config Map
+ - Secret ile çalışma mantığı aynıdır. Tek fark secret base 64 crypted ile verileri tutar. 
+### PV and PVC
+ 
+ 
+## DeamonSet
+- Tüm workernode üzerinde bir pod çalışıtrmak istiyorsak bu podu deamonset ile sarmamız gerekir.Yeni bir node oluştugunda dahi deamonset bu podu orada tekrear ayaga kaldırır.Yaml formatı deployment ile tamamen aynıdır.
 ## k8s Ağ altyapısı
 K8s kurulumda pod’lara ip dağıtılması için bir IP adres aralığı (--pod-network-cidr) belirlenir.Tüm podlara uniq bir ip atanır.
 Aynı cluster üzerindeki poldar birbirleri üzerinde bir Nat olmadan haberleşebilir.3 tür servis objesi vardır:
