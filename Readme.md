@@ -281,8 +281,67 @@ poda bağlama:
 ### Config Map
  - Secret ile çalışma mantığı aynıdır. Tek fark secret base 64 crypted ile verileri tutar. 
 ### PV and PVC
- 
- 
+ - Persistent volume : ephemeral volume olan emtydir de podlar öldüğünde volume yok oluyordur diğer volume olan hostPath de ise sadece üzerinde kostugu node üzerinde veri devamlılıgı saglanıyordu. Bu gibi durumlardan sıyrılmak adına nodelardan bağımsız bir volume oluşturabiliriz.  
+ Not: CSI:konteyner orkestrasyon sistemlerinde depolama sağlayıcıları arasında ortak bir arayüz sağlar ve farklı depolama kaynaklarının daha kolay yönetilmesine olanak tanır.Default da gelen depolama sağlayıcıları dışında farklı depolama sağlayıcıları driverlarını sisteme yüklemek için bir arayüz sunar.  
+ Persistent volume kullanabilmek için depolama sağlayıcısı ayaga kalkması gerekyor.Örnek bir nfs servisi:  
+ ```
+ apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+  labels:
+    pv: deneme
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  nfs:
+    path: /tmp
+    server: 172.17.0.2
+ ```
+ - Persistent volume claim : Persistent volumleri bir poda baglamak içic pvc lere ihtiyac vardır.Binevi aracı   
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  selector:
+    matchLabels:
+      pv: deneme
+```
+poda bağalama:  
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+```
+### Storage Class
+
+
+
+## Authentication
+
 ## DeamonSet
 - Tüm workernode üzerinde bir pod çalışıtrmak istiyorsak bu podu deamonset ile sarmamız gerekir.Yeni bir node oluştugunda dahi deamonset bu podu orada tekrear ayaga kaldırır.Yaml formatı deployment ile tamamen aynıdır.
 ## k8s Ağ altyapısı
