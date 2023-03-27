@@ -10,6 +10,10 @@ kube-scheduler (sched) -> K8s’i çalışma planlamasının yapıldığı yer. 
 kapandı bu kısımda cm devreye girer ve podu ayaga kaldırır.
 - kubelet = ETCD yi izleyerek kube-scheduler ın algoritmalarına göre seçtiği node da containerd ye istek göndererek imajı oluşturur.  
 - kube-proxy = podlar uzeridenki network kurallarını ve trafik akışını yönetir.  
+![image](https://user-images.githubusercontent.com/73287349/227900843-23c7940b-449d-496a-8f3e-7cb6bf808cb7.png)  
+![image](https://user-images.githubusercontent.com/73287349/227901136-b35a853a-2cab-4fd4-844e-7fd86cf8bd85.png)  
+
+
 ## Pod
 - Kubernetes container orkestra şefi. K8s de containerlar podlar üzerinde oluşturulur.Podlar içerisinde 1 veya birden fazla container olablir.(Best practice 1P = 1C)  
 - pod calışma süreci = Her pod’un unique bir ID’si (uid) vardır ve unique bir IP’si vardır. Api-server, bu uid ve IP’yi etcd’ye kaydeder. Scheduler ise herhangi bir podun node ile ilişkisi kurulmadığını görürse, o podu çalıştırması için uygun bir worker node seçer ve bu bilgiyi pod tanımına ekler. Pod içerisinde çalışan kubelet servisi bu pod tanımını görür ve ilgili container’ı çalıştırır.  
