@@ -209,6 +209,16 @@ resources:
       {}
  ```
  - hostPath volumeler podun üzerinde çalıştığı worker node un belirlenen pathlerini containerlara mount etmeye yarar. Worker node üzerinde değişiklikler kalıcıdır.Pod ölse bile..   
+ ```
+     volumeMounts:
+    - mountPath: /test-pd
+      name: test-volume
+  volumes:
+  - name: test-volume
+    hostPath:
+      path: /data
+      type: Directory
+ ```  
  
  ### Secret
  - Secret object uygulşamamızın için değerli ve gizli olan verileri güvenli(base64) bir şekilde tutacagımıuz object türüdür. Oluşturulan secret objesi de aynı volume gibi podlara baglanabilir,env variable olarak verilebilir.Secret obje örneği:  
@@ -317,7 +327,14 @@ spec:
         claimName: myclaim
 ```
 ### Storage Class
-- Persistent cloume ile depolama sağlayıcıları kurma zahmatinden kurtulmak için tanımlanmış obje diyebiliriz.Clous servis saglayılarında var olan bu volumeler claim ile birlikte podlara mount edilebilir.
+- Persistent cloume ile depolama sağlayıcıları kurma zahmatinden kurtulmak için tanımlanmış obje diyebiliriz.Clous servis saglayılarında var olan bu volumeler claim ile birlikte podlara mount edilebilir.  
+PV PVC ve Strorage class için özet geçersek,stroage class aslında bizim fiziksel depolama birimimiz.Strogae Class üzerinden depolama sağlamak için persistent volumeler bir interface görevi görüyor.Pvc ise pv nin sağladığı bu arabirimden faydalanıp podlar ile baglantı kuruyor.Pv ile pvc nin eşleşmesi için StorageClassName ve AccesMode larının otomatik eşit olması gerekli.  
+bizim geçici depolama olarak kullandığımız hostpathler ile sağladığımız depolama node ayakta kaldığı sürece var oluyor. Peki storage class ile localdisk  tipinde depolama sağlarkende hotspath ile node da bir dosyaya mount ediyoruz. Bu node ölünce veriler kaybolurmu yoksa disk hdd gibimi davranır.Depolama hdd gibi davranır.  
+![image](https://user-images.githubusercontent.com/73287349/227888916-624fb2c3-c9d9-4bcb-b113-0bd4b9ee27bc.png)
+![image](https://user-images.githubusercontent.com/73287349/227889518-97f609fd-3589-41cf-9fec-15936c163551.png)
+
+
+
 
 ## Authentication
 - Dışarıdan bi kullanıcı cluster a bağlanmak için certfica(x-509) ile contexte bilgileri geçilerek authenticate olması gerekiyor.Önce istekte bulunacak kişi ssl key oluşturmalı ve onu crypte etmeli.Daha sonra bunu kuberntese yollamalı.Kuberntese geelen bilgieler dogrultusunda k8s admini kullanıcı için bir certifica oluşturur ve onu decode ederek kullanıcıya geri verir. Authenticate olan kullanıcın yetkileri 0 olarak gerlir.61.ders  
@@ -459,6 +476,8 @@ spec:
       port: 80
       targetPort: 9376
   ```  
+  ![image](https://user-images.githubusercontent.com/73287349/227898515-2030bc47-543b-4ca9-8390-e34e5f79c6fc.png)  
+
   impretaive şekilde servis expose etme:
   ```kubectl expose deployment backend --type=ClusterIP --name=backend```
   -DNS = IPAdress.namespace.objecttype.cluster.local
@@ -529,7 +548,9 @@ spec:
             name: service2
             port:
               number: 80
-```
+```  
+![image](https://user-images.githubusercontent.com/73287349/227898397-65b21924-98be-4a5c-947b-137ac6de3ed7.png)
+
 
 
 
