@@ -556,6 +556,61 @@ spec:
 ![image](https://user-images.githubusercontent.com/73287349/227898397-65b21924-98be-4a5c-947b-137ac6de3ed7.png)
 
 
+# Cloud Guru
+
+## NameSpace 
+- kubectl get namespaces
+- kubectl get ns
+- kubectl get pod --namespace dev
+- kubectl get pod -n dev
+- kubectl get pod --all-namespace
+- kubectl get pod -A
+- kubectl create ns dev
+- kubectl delete ns dev
+- kubectl run pod firstpod --image=nginx --namesapce=dev
+- YAML: 
+- - ns.yml =
+```
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: dev
+```
+- - kubectl create -f ns.yml
+- - kubectl apply -f ns.yml
+
+## safely node drain
+- Bir node un bakım aşaması geldiğinde node ugüvenli bir şekilde clusterdan kopratılması gerekir. İlk önce node u skubecsheduler tarafıdan schedule edilemez hale getirebilriz ya da direkt drain edebiliriz. 
+- kubectl cordon node1 = Node1 artık kubescheculer tarafından schedule dielemez. Yabni herhangi bir pod bu node a atanamaz.
+- kubectl drain  node1 =  "ReplicationController, ReplicaSet, Job veya StatefulSet tarafından yönetilmeyen Bölmeler silinemez". Yani direkt olarak manuel bir pod oluşturmada node u drain etmek gerekirken hata alırız. Bunu önlemek için kubectl drain  node1 --force kullanılmalı. Drain edilecek node üzerinde deamonset var ise yine hata alırız. Deamonsetleri gormezden gelmek için kubectl drain node1 --ignore-daemonsets kullanılmalı.
+- kubectl uncordon node1 = Bakımı tamamlanmış node u clustera tekrar ekler fakat silinmiş yada evict edilmiş podlar tekrar o node uzerine geçmez.
+## Upgrading kubeadm
+- step by step upgrage işlemi:
+- - kubectl drain <controlplaneName> --ignore-deamonsets
+  - sudo apt-get update
+  - sudo apt get install -y --allow-change-held-packages kubeadm=1.22.2-00
+  - kubeadm version
+  - sudo kubeadm upgrade plan v1.22.2 (v1.22.2 git version)
+  - sudo kubeadm upgrade apply v1.22.2
+  - sudo apt-get update
+  - sudo apt get install -y --allow-change-held-packages kubelet=1.22.2-00 kubectl=1.22.2-00 
+  - sudo systemctl daemon-reload
+  - sudo systemctl restart kubelet
+  - kubectl uncordon <controlplaneName>
+  - kubectl drain <workernodename> --ignore-deamonsets --force
+  - sudo apt-get update
+  - sudo apt get install -y --allow-change-held-packages kubeadm=1.22.2-00
+  - sudo kubeadm upgrade node
+  - sudo apt-get update
+  - sudo apt get install -y --allow-change-held-packages kubelet=1.22.2-00 kubectl=1.22.2-00 
+  - sudo systemctl daemon-reload
+  - sudo systemctl restart kubelet
+  - kubectl uncordon <workenrnodename>
+## ETCD BackUp
+  
+  
+
+
 
 
 
