@@ -609,10 +609,29 @@ spec:
 ## ETCD BackUp
   
   
-
-
-
-
+## chp4
+- ```
+  kubectl apply -f ..yml (var olan pod a bir daha create dersen hata almaz değiştirir)
+  kubectl create -f ..yml (var olan pod a bir daha create dersen hata)
+  kubectl get pod -o (wide,yaml,json)
+  kubectl get pod --selector app = dev (etiketlere göre seçer)
+  kubectl get pod -n kube-system
+  kubectl get pods -o yaml -n kube-system --sort-by .spec.dnsPolicy (sort by sıralama)
+  kubectl exec my_pod -- echo "hi"
+  kubectl exec multipod -c containername -- echo "hi"
+  kubetl delete pod pod1
+  kubectl run pod --image=nginx --dry-run -o yaml
+  kubectl create deployment mydeployment..
+  kubectl scale deployment mydeployment --replica-set=2 --record (--record kaydediro)
+  ```
+- Role: Namespace kapsamında kullanıcılara yetkiler vermek üzere oluşturulur.Role oluşturduktan sonra kullanıcıya bağlamak için Rolebinding objesi kullanılır.
+- Cluster Role: Cluster kapsamında kullanıcılara yetkiler vermek üzere oluşturulur.Role oluşturduktan sonra kullanıcıya bağlamak için ClusterRolebinding objesi kullanılır.
+- Service Account: Podlarında bazen k8s apisine ulaşması gerekebilir. Bunu yapmak için bir kaç authemtication işlemi yapması gerekiyor. Genel işleyiş Rollerin Role binding ile bir servis accounta baglanıp servis accountunda bir poda bağlanması. Bu şekilde yetkilendirilen podun /var/run/secrets/kube.. altında sertifikası tokenı vs oluşuyor. Artık pod bu token ile k8s apisini kullanabilir. KUBDOC DA YOK. kubectl create sa deneme --dry-run -o yaml
+- kubectl top pod,kubectl top node =) Memory Cpu kullanımları gösterir.
+- kubectl top pod,kubectl top node --sort-by cpu
+## chapter5
+- configMap = poda bilgi geçmek istersek.
+- secret = poda bilgi geçmek istersek.(base 64)
 
 
 
