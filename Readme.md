@@ -584,8 +584,18 @@ spec:
 - kubectl cordon node1 = Node1 artık kubescheculer tarafından schedule dielemez. Yabni herhangi bir pod bu node a atanamaz.
 - kubectl drain  node1 =  "ReplicationController, ReplicaSet, Job veya StatefulSet tarafından yönetilmeyen Bölmeler silinemez". Yani direkt olarak manuel bir pod oluşturmada node u drain etmek gerekirken hata alırız. Bunu önlemek için kubectl drain  node1 --force kullanılmalı. Drain edilecek node üzerinde deamonset var ise yine hata alırız. Deamonsetleri gormezden gelmek için kubectl drain node1 --ignore-daemonsets kullanılmalı.
 - kubectl uncordon node1 = Bakımı tamamlanmış node u clustera tekrar ekler fakat silinmiş yada evict edilmiş podlar tekrar o node uzerine geçmez.
+- node selector ile bir node seçip pod yarat.
+- aynı şekilde deployment yarat
+- node u drain etmeye çalış: kuebctl drain nodename
+- hata gelicek pod = "ReplicationController, ReplicaSet, Job veya StatefulSet tarafından yönetilmeyen Bölmeler silinemez"
+- hem daemonsetden hemde "ReplicationController, ReplicaSet, Job veya StatefulSet tarafından yönetilmeyen Bölmeler silinemez" bunları görmezden gelmek için
+- kubectl drain worker-2 --ignore-daemonsets --force
+- worker-2        Ready,SchedulingDisabled   <none>          30m   v1.24.0
+- deployment otomatik oalrak farklı nodelara dağılır.(ben nodeselector ile seçtiğim için dağılmadı)
+- kubectl uncordon worker-2 ile node eski haline döner.
+- kubedoc da aynı
 ## Upgrading kubeadm
-- step by step upgrage işlemi:
+- step by step upgrade işlemi:
 - - kubectl drain <controlplaneName> --ignore-deamonsets
   - sudo apt-get update
   - sudo apt get install -y --allow-change-held-packages kubeadm=1.22.2-00
@@ -606,6 +616,19 @@ spec:
   - sudo systemctl daemon-reload
   - sudo systemctl restart kubelet
   - kubectl uncordon <workenrnodename>
+  - kube doc da var aynısı
+  - ilk önce control plnae drain et
+  - sonra apt kubeadm
+  - upgradeplan and upgrade apply
+  - sonra kubelet kubcetl apt
+  - sudo systemctl daemon-reload sudo systemctl restart kubelet
+  - sonra uncordon
+  - worker node u kontrol de drain et
+  - sonra kubeadm apt
+  - upgrade node
+  - sonra kubelet kubcetl apt
+  - sudo systemctl daemon-reload sudo systemctl restart kubelet
+  - sonra uncordon
 ## ETCD BackUp
   
   
