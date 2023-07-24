@@ -656,8 +656,54 @@ spec:
 - configMap = poda bilgi geçmek istersek.
 - secret = poda bilgi geçmek istersek.(base 64)
 
+## extralar
+- #### Affinitiy
+- Bu affinity ile seçilen node var ise podu oluştur. Yoksa oluşturma filtresi yapılıyor. Zorunlu tutarak.
+- ![image](https://github.com/omerulusoy41/Kubernetes/assets/73287349/d648f166-2b71-4ba5-bc6f-44e6ae340459)
+- bu affinity ile belirtilen node varmı yokmu kontrol edilir yoksa podu yine çalıştırır.()weight öncelik
+- ![image](https://github.com/omerulusoy41/Kubernetes/assets/73287349/b61f0b23-8197-4920-a4d7-35c7fc5018b1)
+- pod affinity ile filtrelenmiş özelliklere göre worker node üzerinde filtreyi uygulayarak podu calıstırır. Yani filtre o worker nodda var mı varsa çalışıtır. Topologykey: hostname,AZ vs. belirlemek için.
+- ![image](https://github.com/omerulusoy41/Kubernetes/assets/73287349/4e2f025e-6531-4f81-9f8d-a0583915abe4)
+- #### Statefulset
+- headles Service:
+- ```
+   apiVersion: v1
+    kind: Service
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      ports:
+      - port: 80
+        name: web
+      clusterIP: None
+      selector:
+        app: nginx
+  ```
+  - bu şekilde arka tarafda podlara hizmet eden  headles service i farklı bir pod oluşturup pinglersek yine loadbalancing ile farklı farklı podları pingler fakat headless service in sağladıgı extra özellik ise podname.servicename yaparak belirli poda hizmet etmesidir.
+  - statefulset: Bu obje türü deploymenta cok benzer fakat deploymenta extra olarak podlar için unique name ve sıralama yaparak bir ordering tanımlar. pv ler ile desteklenirse silinen pod yerine yine aynı özellikte aynı pod aynı değerlerle eşitlenir.Scale up Scale down da yine order bir şekilde devam eder.
+ 
+  - #### Job
+  -  Job: Anlık çalışıp kapanacak podlar için örneğin veritabanı pod um var ve ben bunun içinden veri alıp exelde maplicam bunun için singleton pod tanımlayıp deneyebilirim fakat singleton pod fail edebilir ederse düzeltiilemez bunun yerine deployment ile denesem işim bittiğinde podlar silinmez silinirse tekrar oluşur bunlar yerine job nesneleri oluşturarak pod işi tamamlanınca kapanan podlar tanımlayabiliriz.
+  -  ![image](https://github.com/omerulusoy41/Kubernetes/assets/73287349/5e6ae38a-3edb-452d-bf96-a4b3de9ca16e)
+  -  cronjob: Periyodik joblar için shcedule düzenler.
+  -  ![image](https://github.com/omerulusoy41/Kubernetes/assets/73287349/fa118a0d-9527-447f-8e72-070ae8755fac)
+  -  #### private Reristry
+  -  private registry var ise kubeletin imajları registryden çekmesi için bir authentication işlemi yapması gerekiyor. Biz bunu pod tanımı içerisinde sercretlar verererk hallediyoruz. Öncesinde bir secret olusturuyoruz. Secretın tipi docker-registy şeklinde
+  -  kubectl create secret docker-registry name --docker-server="url" --docker-username="kuLlanici_adi"--docker-password="sifre" olucak. poda tanımlanması da:
+  -  ![image](https://github.com/omerulusoy41/Kubernetes/assets/73287349/701cc045-3b19-4d98-a9d4-5f92192e5ef9)
+  - #### Helm
+  - Helm,Kubernetes üzerinde uygulamaları kolayca yönetmenizi yarayan bir araç olarak karşımıza çıkıyor.Helm ile kolayca deploy edebilir,upgrade edebilir,sürümleri kontrol edebilirsiniz.Helm ürünü ile birlikte “Charts” dediğimiz kavram giriyor.Charts,önceden Kubernetes uygulamalarımızı deploy etmek için hazırladığımız yaml dosyaları bütünüdür.Service,Deployment,ReplicationController gibi tanımlamaların paket hali diyebiliriz.
+
+
 
 
+
+
+
+
+ 
 
 
 
